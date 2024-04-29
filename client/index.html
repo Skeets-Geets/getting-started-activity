@@ -1,13 +1,156 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hello, World</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/main.js"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Game Start</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: black;
+            position: relative;
+        }
+
+        video {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: 1;
+        }
+
+        #startGameButton {
+            cursor: pointer;
+            background: none;
+            border: none;
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            animation: moveUp 5s ease-out forwards;
+        }
+
+        @keyframes moveUp {
+            from {
+                bottom: -10%;
+            }
+            to {
+                top: 50%;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        #raceCar {
+            display: none;
+            width: 1024px;
+            height: 1024px;
+            background: url('images/BLUECAR.png') no-repeat center center;
+            background-size: contain;
+            position: absolute;
+            left: 50%;
+            top: 52%;
+            bottom: 10%;
+            transform: translateX(-50%);
+            z-index: 2;
+            transition: left 0.1s ease-out;
+        }
+
+        .obstacle {
+            position: fixed;
+            top: -100px; /* Start above the screen */
+            width: 50px;
+            height: 50px;
+            background: url('images/FIRESKULL.gif') no-repeat center center;
+            background-size: cover;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <video id="mainVideo" autoplay loop muted playsinline>
+        <source src="images/RETRORACE.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <video id="gameVideo" style="display: none;" muted playsinline>
+        <source src="images/RETRORACEMENU_2.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <button id="startGameButton" style="background: none; border: none; padding: 0; cursor: pointer;">
+        <img src="images/Comp 3.gif" alt="Start Game">
+    </button>
+    <div id="raceCar"></div>
+
+    <script>
+        document.getElementById('startGameButton').addEventListener('click', function() {
+            var mainVideo = document.getElementById('mainVideo');
+            var gameVideo = document.getElementById('gameVideo');
+
+            mainVideo.style.display = 'none';
+            mainVideo.pause();
+
+            gameVideo.style.display = 'block';
+            gameVideo.currentTime = 0;
+            gameVideo.play();
+
+            this.style.display = 'none';
+
+            setTimeout(displayCar, 10000); // Delay the display of the car
+        });
+
+        function displayCar() {
+            var car = document.getElementById('raceCar');
+            car.style.display = 'block';
+            setTimeout(function() {
+                car.style.background = "url('images/New Piskel.gif') no-repeat center center";
+                spawnObstacles();
+            }, 5000); // Change background to the animated GIF after 5 seconds
+        }
+
+        const car = document.getElementById('raceCar');
+        let positionX = window.innerWidth / 2; // Center the car initially
+        const speed = 20; // Increased speed for more responsive movement
+
+        window.addEventListener('keydown', function(event) {
+            const carWidth = car.offsetWidth;
+            const screenWidth = window.innerWidth;
+
+            switch(event.key) {
+                case 'ArrowLeft':
+                    positionX = Math.max(positionX - speed, 0); // Prevent off-screen to the left
+                    break;
+                case 'ArrowRight':
+                    positionX = Math.min(positionX + speed, screenWidth - carWidth); // Prevent off-screen to the right
+                    break;
+            }
+            car.style.left = positionX + 'px';
+            event.preventDefault(); // Prevent default behavior
+        }, false);
+
+        function spawnObstacles() {
+            setInterval(() => {
+                let obstacle = document.createElement('div');
+                obstacle.className = 'obstacle';
+                obstacle.style.left = Math.random() * (window.innerWidth - 50) + 'px'; // Random position
+                document.body.appendChild(obstacle);
+
+                let fallInterval = setInterval(() => {
+                    if (parseInt(obstacle.style.top) < window.innerHeight) {
+                        obstacle.style.top = parseInt(obstacle.style.top) + 5 + 'px';
+                    } else {
+                        clearInterval(fallInterval);
+                        document.body.removeChild(obstacle);
+                    }
+                }, 100);
+
+            }, 2000); // Spawn an obstacle every 2 seconds
+        }
+    </script>
+</body>
 </html>
